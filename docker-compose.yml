@@ -1,0 +1,106 @@
+services:
+  # ============================================================
+  # Zookeeper — required by Kafka for cluster coordination
+  # ============================================================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | timeout 2 bash -c 'cat > /dev/tcp/localhost/2181' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ============================================================
+  # Kafka — message broker for the streaming pipeline
+  # ============================================================
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 40s
+
+  # ============================================================
+  # MongoDB — document store for processed sensor data
+  # ============================================================
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: iot_sensor_db
+    healthcheck:
+      test: mongosh --eval "db.adminCommand('ping')" --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Producer — reads CSV sensor data and streams to Kafka
+  # ============================================================
+  producer:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: sensor-producer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data:ro
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: sensor-data
+      DATA_FILE: /app/data/iot_telemetry_data.csv
+      STREAM_DELAY: "0.01"
+
+  # ============================================================
+  # Consumer — reads from Kafka and writes to MongoDB
+  # ============================================================
+  consumer:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    container_name: sensor-consumer
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: sensor-data
+      KAFKA_GROUP_ID: sensor-consumer-group
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DB: iot_sensor_db
+      MONGO_COLLECTION: sensor_readings
+
+volumes:
+  mongodb_data:
