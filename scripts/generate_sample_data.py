@@ -1,17 +1,18 @@
 """
-Generate realistic IoT environmental sensor data for the municipality scenario.
+Generiert realistische IoT-Umwelt-Sensordaten für das Stadtverwaltungsszenario.
 
-Simulates sensors deployed across a city measuring:
-- temperature (°C)
-- humidity (%)
-- co (carbon monoxide, ppm)
-- smoke (ppm)
-- lpg (liquid petroleum gas, ppm)
-- noise (dB) — future sensor type
-- light (boolean)
-- motion (boolean)
+Simuliert Sensoren an verschiedenen Stadtstandorten, die messen:
+- temperature (Temperatur, °C)
+- humidity (Luftfeuchtigkeit, %)
+- co (Kohlenmonoxid, ppm)
+- smoke (Rauch, ppm)
+- lpg (Flüssiggas, ppm)
+- noise_db (Lärmpegel, dB) — zukünftiger Sensortyp
+- light (Tageslicht, boolean)
+- motion (Bewegung, boolean)
 
-Devices are placed at different city locations with distinct environmental profiles.
+Die Geräte sind an verschiedenen Stadtstandorten mit unterschiedlichen
+Umweltprofilen platziert.
 """
 
 import csv
@@ -20,10 +21,10 @@ import time
 import os
 from datetime import datetime, timedelta
 
-# Seed for reproducibility
+# Seed für Reproduzierbarkeit
 random.seed(42)
 
-# Sensor locations across the city
+# Sensorstandorte in der Stadt
 DEVICES = {
     "sensor-001": {"location": "city-center",     "lat": 48.1351, "lon": 11.5820},
     "sensor-002": {"location": "industrial-zone",  "lat": 48.1450, "lon": 11.6100},
@@ -32,7 +33,7 @@ DEVICES = {
     "sensor-005": {"location": "highway-bridge",    "lat": 48.1200, "lon": 11.6050},
 }
 
-# Environmental profiles per location (base values + noise ranges)
+# Umweltprofile pro Standort (Basiswerte + Rauschbereiche)
 PROFILES = {
     "city-center":      {"temp": (18, 5), "humidity": (50, 15), "co": (0.005, 0.003), "smoke": (0.02, 0.01), "lpg": (0.007, 0.003), "noise": (65, 15)},
     "industrial-zone":  {"temp": (20, 6), "humidity": (45, 12), "co": (0.012, 0.008), "smoke": (0.05, 0.03), "lpg": (0.015, 0.008), "noise": (75, 10)},
@@ -43,12 +44,12 @@ PROFILES = {
 
 
 def generate_reading(device_id: str, device_info: dict, timestamp: datetime) -> dict:
-    """Generate a single sensor reading with realistic environmental noise."""
+    """Generiert einen einzelnen Sensormesswert mit realistischem Umweltrauschen."""
     profile = PROFILES[device_info["location"]]
 
-    # Time-of-day effects (temperature higher at noon, noise lower at night)
+    # Tageszeiteffekte (Temperatur höher mittags, Lärm niedriger nachts)
     hour = timestamp.hour
-    time_temp_modifier = 3 * (1 - abs(hour - 14) / 14)  # peaks at 2 PM
+    time_temp_modifier = 3 * (1 - abs(hour - 14) / 14)  # Maximum um 14 Uhr
     time_noise_modifier = -20 if (hour < 6 or hour > 22) else 0
 
     def noisy(base, spread):
@@ -74,13 +75,13 @@ def generate_reading(device_id: str, device_info: dict, timestamp: datetime) -> 
 def main():
     output_path = os.path.join(os.path.dirname(__file__), "..", "data", "iot_telemetry_data.csv")
 
-    # Generate 7 days of data, one reading per sensor every 30 seconds
+    # Generiere 7 Tage Daten, ein Messwert pro Sensor alle 30 Sekunden
     start_time = datetime(2024, 7, 1, 0, 0, 0)
     interval = timedelta(seconds=30)
     duration = timedelta(days=7)
 
     total_readings = int((duration / interval) * len(DEVICES))
-    print(f"Generating {total_readings:,} sensor readings over 7 days...")
+    print(f"Generiere {total_readings:,} Sensormesswerte über 7 Tage...")
 
     fieldnames = [
         "ts", "device_id", "location", "lat", "lon",
@@ -103,11 +104,11 @@ def main():
             current_time += interval
 
             if count % 50000 == 0:
-                print(f"  {count:,} readings generated...")
+                print(f"  {count:,} Messwerte generiert...")
 
-    print(f"Done! {count:,} readings saved to {output_path}")
+    print(f"Fertig! {count:,} Messwerte gespeichert in {output_path}")
     file_size_mb = os.path.getsize(output_path) / (1024 * 1024)
-    print(f"File size: {file_size_mb:.1f} MB")
+    print(f"Dateigröße: {file_size_mb:.1f} MB")
 
 
 if __name__ == "__main__":

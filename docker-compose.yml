@@ -1,6 +1,6 @@
 services:
   # ============================================================
-  # Zookeeper — required by Kafka for cluster coordination
+  # Zookeeper — Benötigt von Kafka für Cluster-Koordination
   # ============================================================
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
@@ -18,7 +18,7 @@ services:
       start_period: 10s
 
   # ============================================================
-  # Kafka — message broker for the streaming pipeline
+  # Kafka — Nachrichtenbroker für die Streaming-Pipeline
   # ============================================================
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -45,7 +45,7 @@ services:
       start_period: 40s
 
   # ============================================================
-  # MongoDB — document store for processed sensor data
+  # MongoDB — Dokumentenspeicher für verarbeitete Sensordaten
   # ============================================================
   mongodb:
     image: mongo:7.0
@@ -63,7 +63,7 @@ services:
       retries: 5
 
   # ============================================================
-  # Producer — reads CSV sensor data and streams to Kafka
+  # Producer — Liest CSV-Sensordaten und streamt an Kafka
   # ============================================================
   producer:
     build:
@@ -82,7 +82,7 @@ services:
       STREAM_DELAY: "0.01"
 
   # ============================================================
-  # Consumer — reads from Kafka and writes to MongoDB
+  # Consumer — Liest aus Kafka und schreibt in MongoDB
   # ============================================================
   consumer:
     build:

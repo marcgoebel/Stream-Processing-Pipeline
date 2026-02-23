@@ -1,184 +1,185 @@
 # IoT Sensor Streaming Pipeline
 
-A containerized stream processing pipeline for environmental IoT sensor data, built with **Apache Kafka**, **MongoDB**, and **Docker**.
+Eine containerisierte Stream-Processing-Pipeline für Umwelt-IoT-Sensordaten, gebaut mit **Apache Kafka**, **MongoDB** und **Docker**.
 
-## Scenario
+## Szenario
 
-A municipality has installed environmental sensors across the city to measure temperature, humidity, carbon monoxide, smoke, LPG, noise levels, light, and motion. This system ingests the sensor data as a real-time stream, processes it, and stores it in a database for front-end applications and citizen alerting.
+Eine Stadtverwaltung hat Umweltsensoren in der Stadt installiert, die Temperatur, Luftfeuchtigkeit, Kohlenmonoxid, Rauch, LPG, Lärmpegel, Licht und Bewegung messen. Dieses System nimmt die Sensordaten als Echtzeit-Stream auf, verarbeitet sie und speichert sie in einer Datenbank für Frontend-Anwendungen und Bürger-Warnsysteme.
 
-## Architecture
+## Architektur
 
 ```
 ┌──────────────────┐     ┌────────────────────────────┐     ┌──────────────────┐
 │  Python Producer  │────▶│  Apache Kafka               │────▶│  Python Consumer  │
-│  (simulates IoT   │     │  Topic: "sensor-data"       │     │  (enriches data,  │
-│   sensor stream)  │     │  Broker: Confluent 7.6       │     │   writes to DB)   │
-└──────────────────┘     └────────────────────────────┘     └────────┬─────────┘
-        │                         │                                   │
-   Reads CSV                 Zookeeper                          ┌────▼─────────┐
-   (100K+ records)           (coordination)                     │   MongoDB 7   │
-                                                                │   (document   │
-                                                                │    store)     │
-                                                                └──────────────┘
+│  (simuliert IoT-  │     │  Topic: "sensor-data"       │     │  (reichert Daten  │
+│   Sensor-Stream)  │     │  Broker: Confluent 7.6       │     │   an, schreibt    │
+└──────────────────┘     └────────────────────────────┘     │   in Datenbank)   │
+        │                         │                          └────────┬─────────┘
+   Liest CSV                 Zookeeper                                │
+   (100K+ Datensätze)        (Koordination)                    ┌──────▼───────┐
+                                                               │   MongoDB 7   │
+                                                               │   (Dokument-  │
+                                                               │    speicher)  │
+                                                               └──────────────┘
 ```
 
-## Tech Stack
+## Technologie-Stack
 
-| Component     | Technology                    | Purpose                              |
-|---------------|-------------------------------|--------------------------------------|
-| Streaming     | Apache Kafka (Confluent 7.6)  | Message broker for sensor data       |
-| Coordination  | Zookeeper                     | Kafka cluster coordination           |
-| Database      | MongoDB 7.0                   | Flexible document store              |
-| Producer      | Python 3.11 + kafka-python    | Simulates real-time sensor stream    |
-| Consumer      | Python 3.11 + pymongo         | Processes and stores sensor data     |
-| Container     | Docker + Docker Compose       | Portable, reproducible deployment    |
+| Komponente     | Technologie                   | Zweck                                  |
+|----------------|-------------------------------|----------------------------------------|
+| Streaming      | Apache Kafka (Confluent 7.6)  | Nachrichtenbroker für Sensordaten      |
+| Koordination   | Zookeeper                     | Kafka-Cluster-Koordination             |
+| Datenbank      | MongoDB 7.0                   | Flexibler Dokumentenspeicher           |
+| Producer       | Python 3.11 + kafka-python    | Simuliert Echtzeit-Sensor-Stream       |
+| Consumer       | Python 3.11 + pymongo         | Verarbeitet und speichert Sensordaten  |
+| Container      | Docker + Docker Compose       | Portable, reproduzierbare Bereitstellung|
 
-## Prerequisites
+## Voraussetzungen
 
 - [Docker](https://www.docker.com/get-started) (v20.10+)
 - [Docker Compose](https://docs.docker.com/compose/) (v2.0+)
 
-No other dependencies required — everything runs inside containers.
+Keine weiteren Abhängigkeiten nötig — alles läuft in Containern.
 
-## Quick Start
+## Schnellstart
 
 ```bash
-# 1. Clone the repository
+# 1. Repository klonen
 git clone https://github.com/marcgoebel/Stream-Processing-Pipeline.git
 cd Stream-Processing-Pipeline
 
-# 2. Start the entire pipeline
+# 2. Gesamte Pipeline starten
 docker-compose up --build
 
-# 3. (Optional) Run in background
+# 3. (Optional) Im Hintergrund starten
 docker-compose up --build -d
 
-# 4. Check logs
+# 4. Logs prüfen
 docker-compose logs -f producer
 docker-compose logs -f consumer
 
-# 5. Stop the pipeline
+# 5. Pipeline stoppen
 docker-compose down
 
-# 6. Stop and remove all data
+# 6. Pipeline stoppen und alle Daten löschen
 docker-compose down -v
 ```
 
-## Dataset
+## Datensatz
 
-The sample dataset contains **100,800 sensor readings** from 5 simulated sensors across 7 days, generated by `scripts/generate_sample_data.py`.
+Der Beispieldatensatz enthält **100.800 Sensormesswerte** von 5 simulierten Sensoren über 7 Tage, generiert durch `scripts/generate_sample_data.py`.
 
-### Sensor Locations
+### Sensor-Standorte
 
-| Device ID   | Location           | Description                        |
-|-------------|--------------------|------------------------------------|
-| sensor-001  | city-center        | Downtown area, moderate pollution  |
-| sensor-002  | industrial-zone    | Factory district, higher emissions |
-| sensor-003  | residential-north  | Suburban, low pollution            |
-| sensor-004  | park-area          | Green space, cleanest air          |
-| sensor-005  | highway-bridge     | Traffic zone, high noise + CO      |
+| Geräte-ID   | Standort            | Beschreibung                          |
+|-------------|---------------------|---------------------------------------|
+| sensor-001  | city-center         | Innenstadt, mittlere Belastung        |
+| sensor-002  | industrial-zone     | Industriegebiet, höhere Emissionen    |
+| sensor-003  | residential-north   | Wohngebiet, geringe Belastung         |
+| sensor-004  | park-area           | Grünfläche, sauberste Luft            |
+| sensor-005  | highway-bridge      | Verkehrszone, hoher Lärm + CO         |
 
-### Data Schema
+### Datenschema
 
-| Field        | Type    | Description                          |
-|--------------|---------|--------------------------------------|
-| ts           | string  | ISO 8601 timestamp                   |
-| device_id    | string  | Unique sensor identifier             |
-| location     | string  | Deployment location name             |
-| lat          | float   | Latitude                             |
-| lon          | float   | Longitude                            |
-| temperature  | float   | Temperature in °C                    |
-| humidity     | float   | Relative humidity in %               |
-| co           | float   | Carbon monoxide in ppm               |
-| smoke        | float   | Smoke level in ppm                   |
-| lpg          | float   | Liquid petroleum gas in ppm          |
-| noise_db     | float   | Noise level in dB                    |
-| light        | bool    | Daylight detected                    |
-| motion       | bool    | Motion detected                      |
+| Feld         | Typ     | Beschreibung                          |
+|--------------|---------|---------------------------------------|
+| ts           | String  | ISO 8601 Zeitstempel                  |
+| device_id    | String  | Eindeutige Sensor-Kennung             |
+| location     | String  | Name des Einsatzortes                 |
+| lat          | Float   | Breitengrad                           |
+| lon          | Float   | Längengrad                            |
+| temperature  | Float   | Temperatur in °C                      |
+| humidity     | Float   | Relative Luftfeuchtigkeit in %        |
+| co           | Float   | Kohlenmonoxid in ppm                  |
+| smoke        | Float   | Rauchpegel in ppm                     |
+| lpg          | Float   | Flüssiggas in ppm                     |
+| noise_db     | Float   | Lärmpegel in dB                       |
+| light        | Bool    | Tageslicht erkannt                    |
+| motion       | Bool    | Bewegung erkannt                      |
 
-## Data Processing
+## Datenverarbeitung
 
-The consumer enriches each reading with:
+Der Consumer reichert jede Messung an mit:
 
-- **`ingested_at`**: UTC timestamp of when the data was processed
-- **`alerts`**: List of threshold violations (e.g., CO exceeding safe levels)
+- **`ingested_at`**: UTC-Zeitstempel der Verarbeitung
+- **`alerts`**: Liste der Grenzwertüberschreitungen (z.B. CO über sicherem Niveau)
 
-### Alert Thresholds
+### Alarm-Grenzwerte
 
-| Metric      | Safe Range     | Alert Condition           |
-|-------------|----------------|---------------------------|
-| Temperature | -10°C to 40°C  | Outside range → alert     |
-| Humidity    | 20% to 90%     | Outside range → alert     |
-| CO          | 0 to 0.02 ppm  | Exceeds max → alert       |
-| Smoke       | 0 to 0.05 ppm  | Exceeds max → alert       |
-| Noise       | 0 to 85 dB     | Exceeds max → alert       |
+| Messgröße    | Sicherer Bereich | Alarm-Bedingung              |
+|--------------|------------------|------------------------------|
+| Temperatur   | -10°C bis 40°C   | Außerhalb → Alarm            |
+| Feuchtigkeit | 20% bis 90%      | Außerhalb → Alarm            |
+| CO           | 0 bis 0,02 ppm   | Überschreitung → Alarm       |
+| Rauch        | 0 bis 0,05 ppm   | Überschreitung → Alarm       |
+| Lärm         | 0 bis 85 dB      | Überschreitung → Alarm       |
 
-## Project Structure
+## Projektstruktur
 
 ```
-iot-sensor-streaming-pipeline/
-├── docker-compose.yml          # Orchestrates all 5 services
+Stream-Processing-Pipeline/
+├── docker-compose.yml          # Orchestriert alle 5 Dienste
 ├── producer/
-│   ├── Dockerfile              # Producer container definition
-│   ├── producer.py             # Kafka producer application
-│   └── requirements.txt        # Python dependencies
+│   ├── Dockerfile              # Producer-Container-Definition
+│   ├── producer.py             # Kafka-Producer-Anwendung
+│   └── requirements.txt        # Python-Abhängigkeiten
 ├── consumer/
-│   ├── Dockerfile              # Consumer container definition
-│   ├── consumer.py             # Kafka consumer application
-│   └── requirements.txt        # Python dependencies
+│   ├── Dockerfile              # Consumer-Container-Definition
+│   ├── consumer.py             # Kafka-Consumer-Anwendung
+│   └── requirements.txt        # Python-Abhängigkeiten
 ├── data/
-│   └── iot_telemetry_data.csv  # Sample sensor data (100K+ records)
+│   └── iot_telemetry_data.csv  # Beispiel-Sensordaten (100K+ Datensätze)
 ├── scripts/
-│   └── generate_sample_data.py # Data generation script
-└── README.md                   # This file
+│   └── generate_sample_data.py # Datengenerierungsskript
+└── README.md                   # Diese Datei
 ```
 
-## Querying the Data
+## Daten abfragen
 
-After the pipeline has run, you can query MongoDB:
+Nachdem die Pipeline gelaufen ist, kann MongoDB abgefragt werden:
 
 ```bash
-# Connect to MongoDB inside the container
+# Mit MongoDB im Container verbinden
 docker exec -it mongodb mongosh iot_sensor_db
 
-# Count all documents
+# Alle Dokumente zählen
 db.sensor_readings.countDocuments()
 
-# Find readings with alerts
+# Messwerte mit Alarmen finden
 db.sensor_readings.find({ "alerts": { $ne: [] } }).limit(5)
 
-# Average temperature per location
+# Durchschnittstemperatur pro Standort
 db.sensor_readings.aggregate([
   { $group: { _id: "$location", avg_temp: { $avg: "$temperature" } } }
 ])
 
-# Readings from a specific sensor in a time range
+# Messwerte eines bestimmten Sensors in einem Zeitraum
 db.sensor_readings.find({
   device_id: "sensor-002",
   ts: { $gte: "2024-07-03", $lte: "2024-07-04" }
 }).count()
 ```
 
-## Design Decisions
+## Entwurfsentscheidungen
 
-### Why Kafka?
-- Industry standard for stream processing with strong durability guarantees
-- Supports partitioning by device_id for per-sensor ordering
-- Horizontally scalable — adding more brokers scales throughput linearly
-- Decouples producers from consumers, enabling independent scaling
+### Warum Kafka?
+- Industriestandard für Stream-Verarbeitung mit starken Haltbarkeitsgarantien
+- Unterstützt Partitionierung nach Geräte-ID für sensorspezifische Reihenfolge
+- Horizontal skalierbar — mehr Broker erhöhen den Durchsatz linear
+- Entkoppelt Producer von Consumer und ermöglicht unabhängige Skalierung
 
-### Why MongoDB?
-- **Schema flexibility**: New sensor types (CO₂, fine dust) can be added without migration
-- **Document model**: Sensor readings with nested alerts map naturally to documents
-- **Horizontal scaling**: Built-in sharding for distributed deployments
-- **Indexing**: Compound indexes on (device_id, ts) enable efficient time-series queries
+### Warum MongoDB?
+- **Schema-Flexibilität**: Neue Sensortypen (CO₂, Feinstaub) ohne Migration hinzufügbar
+- **Dokumentenmodell**: Sensormesswerte mit verschachtelten Alarmen passen natürlich ins Dokumentformat
+- **Horizontale Skalierung**: Eingebautes Sharding für verteilte Bereitstellungen
+- **Indizierung**: Zusammengesetzte Indizes auf (device_id, ts) ermöglichen effiziente Zeitreihenabfragen
 
-### Why Docker Compose?
-- Single command (`docker-compose up`) starts the entire pipeline
-- No host dependencies beyond Docker itself
-- Portable across operating systems (Linux, macOS, Windows)
-- Health checks ensure services start in the correct order
+### Warum Docker Compose?
+- Ein einziger Befehl (`docker-compose up`) startet die gesamte Pipeline
+- Keine Host-Abhängigkeiten außer Docker selbst
+- Portabel über Betriebssysteme hinweg (Linux, macOS, Windows)
+- Health Checks stellen die korrekte Startreihenfolge der Dienste sicher
 
-## License
+## Lizenz
 
-This project is for educational purposes as part of the IU Data Engineering course (DLBDSEDE02).
+Dieses Projekt dient Bildungszwecken im Rahmen des IU Data Engineering Kurses (DLBDSEDE02).

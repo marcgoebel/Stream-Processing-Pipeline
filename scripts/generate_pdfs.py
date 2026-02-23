@@ -1,12 +1,12 @@
 """
-Generate all three portfolio PDF documents according to IU formal requirements.
+Generiert alle drei Portfolio-PDF-Dokumente gemäß IU-Formalvorgaben.
 
-Format specs:
-- Paper: DIN A4
-- Margins: 2cm all sides
-- Font: Arial 11pt (body), 12pt (headings)
-- Line spacing: 1.5
-- Alignment: Justified
+Formatvorgaben:
+- Papier: DIN A4
+- Ränder: 2cm allseitig
+- Schrift: Arial 11pt (Fließtext), 12pt (Überschriften)
+- Zeilenabstand: 1,5
+- Ausrichtung: Blocksatz
 """
 
 from fpdf import FPDF
@@ -16,7 +16,7 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "docs")
 
 
 class PortfolioPDF(FPDF):
-    """Base PDF class with IU formatting requirements."""
+    """Basis-PDF-Klasse mit IU-Formatierungsvorgaben."""
 
     def __init__(self):
         super().__init__()
@@ -31,7 +31,7 @@ class PortfolioPDF(FPDF):
 
     def body_text(self, text):
         self.set_font("Arial", "", 11)
-        self.multi_cell(0, 6.5, text, align="J")  # 6.5mm ~= 1.5 line spacing at 11pt
+        self.multi_cell(0, 6.5, text, align="J")  # 6,5mm ~ 1,5-facher Zeilenabstand bei 11pt
         self.ln(2)
 
     def small_heading(self, text):
@@ -41,85 +41,89 @@ class PortfolioPDF(FPDF):
 
 
 def generate_phase1():
-    """Phase 1: Conception — 1/2 page concept text."""
+    """Phase 1: Konzeption — 1/2 Seite Konzepttext."""
     pdf = PortfolioPDF()
     pdf.add_page()
 
-    pdf.heading("Conception: Stream Processing Pipeline for Municipal IoT Sensor Data")
+    pdf.heading("Konzeption: Stream-Processing-Pipeline fuer kommunale IoT-Sensordaten")
 
     pdf.body_text(
-        "The goal of this project is to design and implement a containerized stream processing pipeline "
-        "that ingests, processes, and stores environmental sensor data collected by a municipality. "
-        "Sensors deployed at five city locations measure temperature, humidity, carbon monoxide, smoke, "
-        "LPG, noise levels, light, and motion. The system must reliably handle continuous data streams "
-        "and store the readings in a way that supports future front-end applications for city planners "
-        "and a citizen alerting system for threshold violations."
+        "Ziel dieses Projekts ist der Entwurf und die Implementierung einer containerisierten "
+        "Stream-Processing-Pipeline, die Umwelt-Sensordaten einer Stadtverwaltung aufnimmt, "
+        "verarbeitet und speichert. Sensoren an fuenf Stadtstandorten messen Temperatur, "
+        "Luftfeuchtigkeit, Kohlenmonoxid, Rauch, LPG, Laermpegel, Licht und Bewegung. Das System "
+        "muss kontinuierliche Datenstroeme zuverlaessig verarbeiten und die Messwerte so speichern, "
+        "dass zukuenftige Frontend-Anwendungen fuer Stadtplaner und ein Buerger-Warnsystem bei "
+        "Grenzwertueberschreitungen unterstuetzt werden."
     )
 
     pdf.body_text(
-        "The pipeline uses Apache Kafka as the central message broker. Kafka was chosen over Spark Streaming "
-        "because it provides a simpler deployment model for the producer-consumer pattern required here, "
-        "offers strong durability guarantees through message persistence, and enables horizontal scaling "
-        "by adding brokers without redesigning the architecture. Kafka's partitioning by device ID ensures "
-        "per-sensor message ordering, which is critical for time-series integrity."
+        "Die Pipeline verwendet Apache Kafka als zentralen Nachrichtenbroker. Kafka wurde gegenueber "
+        "Spark Streaming gewaehlt, da es ein einfacheres Bereitstellungsmodell fuer das hier benoetigte "
+        "Producer-Consumer-Muster bietet, starke Haltbarkeitsgarantien durch Nachrichtenpersistierung "
+        "gewaehrleistet und horizontale Skalierung durch Hinzufuegen von Brokern ermoeglicht, ohne die "
+        "Architektur umzugestalten. Kafkas Partitionierung nach Geraete-ID stellt die sensorspezifische "
+        "Nachrichtenreihenfolge sicher, was fuer die Integritaet der Zeitreihen entscheidend ist."
     )
 
     pdf.body_text(
-        "For storage, MongoDB was selected as the database. Its document model naturally accommodates "
-        "the heterogeneous sensor data: current readings include numeric and boolean fields, and future "
-        "sensors (CO2, fine dust) can be added without schema migrations. MongoDB supports horizontal "
-        "scaling through sharding and provides compound indexes on device ID and timestamp for efficient "
-        "time-series queries. Alternatives like PostgreSQL were considered but rejected due to the rigid "
-        "schema requirements that would complicate the addition of new sensor types."
+        "Als Datenbank wurde MongoDB gewaehlt. Sein Dokumentenmodell eignet sich natuerlich fuer die "
+        "heterogenen Sensordaten: Aktuelle Messwerte umfassen numerische und boolesche Felder, und "
+        "zukuenftige Sensoren (CO2, Feinstaub) koennen ohne Schema-Migrationen hinzugefuegt werden. "
+        "MongoDB unterstuetzt horizontale Skalierung durch Sharding und bietet zusammengesetzte Indizes "
+        "auf Geraete-ID und Zeitstempel fuer effiziente Zeitreihenabfragen. Alternativen wie PostgreSQL "
+        "wurden erwogen, aber aufgrund der starren Schema-Anforderungen abgelehnt, die das Hinzufuegen "
+        "neuer Sensortypen erschweren wuerden."
     )
 
     pdf.body_text(
-        "The entire system is containerized using Docker Compose, orchestrating five services: Zookeeper "
-        "(Kafka coordination), Kafka (message broker), MongoDB (storage), a Python producer (simulates "
-        "sensor stream from CSV data), and a Python consumer (reads from Kafka, enriches data with alert "
-        "flags, and writes to MongoDB). Health checks ensure correct startup order. The implementation "
-        "plan proceeds in three steps: first, setting up the container infrastructure; second, implementing "
-        "the producer and consumer applications; third, testing and optimizing the end-to-end pipeline."
+        "Das gesamte System ist mit Docker Compose containerisiert und orchestriert fuenf Dienste: "
+        "Zookeeper (Kafka-Koordination), Kafka (Nachrichtenbroker), MongoDB (Speicher), einen Python-"
+        "Producer (simuliert Sensor-Stream aus CSV-Daten) und einen Python-Consumer (liest aus Kafka, "
+        "reichert Daten mit Alarm-Flags an und schreibt in MongoDB). Health Checks stellen die korrekte "
+        "Startreihenfolge sicher. Der Implementierungsplan umfasst drei Schritte: erstens Aufbau der "
+        "Container-Infrastruktur, zweitens Implementierung der Producer- und Consumer-Anwendungen, "
+        "drittens Testen und Optimieren der Ende-zu-Ende-Pipeline."
     )
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, "Phase1_Conception.pdf")
+    path = os.path.join(OUTPUT_DIR, "Phase1_Konzeption.pdf")
     pdf.output(path)
-    print(f"Phase 1 saved: {path}")
+    print(f"Phase 1 gespeichert: {path}")
     return path
 
 
 def generate_phase2():
-    """Phase 2: Development — 1/2 page explanation text."""
+    """Phase 2: Entwicklung — 1/2 Seite Erklärungstext."""
     pdf = PortfolioPDF()
     pdf.add_page()
 
-    pdf.heading("Development: Implementation of the Stream Processing Pipeline")
+    pdf.heading("Entwicklung: Implementierung der Stream-Processing-Pipeline")
 
     pdf.body_text(
-        "The implementation follows the concept from Phase 1. The entire system is defined in a single "
-        "docker-compose.yml file that orchestrates five services. Zookeeper and Kafka use official "
-        "Confluent images (v7.6.0), MongoDB uses the official mongo:7.0 image, and the producer and "
-        "consumer are custom Python 3.11 applications built from lightweight Dockerfiles. Health checks "
-        "on Zookeeper, Kafka, and MongoDB ensure that dependent services only start when their "
-        "dependencies are fully operational."
+        "Die Implementierung folgt dem Konzept aus Phase 1. Das gesamte System ist in einer einzigen "
+        "docker-compose.yml-Datei definiert, die fuenf Dienste orchestriert. Zookeeper und Kafka "
+        "verwenden offizielle Confluent-Images (v7.6.0), MongoDB das offizielle mongo:7.0-Image, und "
+        "Producer sowie Consumer sind eigene Python-3.11-Anwendungen, die aus schlanken Dockerfiles "
+        "gebaut werden. Health Checks auf Zookeeper, Kafka und MongoDB stellen sicher, dass abhaengige "
+        "Dienste erst starten, wenn ihre Abhaengigkeiten vollstaendig betriebsbereit sind."
     )
 
     pdf.body_text(
-        "A Python script generates 100,800 realistic sensor readings across five city locations over "
-        "seven days, with time-of-day effects on temperature and noise. The producer reads this CSV "
-        "file and publishes each record as a JSON message to the Kafka topic 'sensor-data', using the "
-        "device ID as the partition key. The consumer subscribes to this topic, deserializes the JSON "
-        "messages, enriches each reading with an ingestion timestamp and alert flags for threshold "
-        "violations (e.g., CO above 0.02 ppm, noise above 85 dB), and batch-inserts 500 documents "
-        "at a time into MongoDB for write performance."
+        "Ein Python-Skript generiert 100.800 realistische Sensormesswerte an fuenf Stadtstandorten "
+        "ueber sieben Tage, mit Tageszeiteffekten auf Temperatur und Laerm. Der Producer liest diese "
+        "CSV-Datei und veroeffentlicht jeden Datensatz als JSON-Nachricht an das Kafka-Topic "
+        "'sensor-data', wobei die Geraete-ID als Partitionsschluessel dient. Der Consumer abonniert "
+        "dieses Topic, deserialisiert die JSON-Nachrichten, reichert jeden Messwert mit einem "
+        "Aufnahmezeitstempel und Alarm-Flags bei Grenzwertueberschreitungen an (z.B. CO ueber "
+        "0,02 ppm, Laerm ueber 85 dB) und fuegt jeweils 500 Dokumente als Batch in MongoDB ein."
     )
 
     pdf.body_text(
-        "MongoDB indexes on (device_id, ts), location, and alerts enable efficient queries for the "
-        "planned front-end applications. The system is fully portable: cloning the GitHub repository "
-        "and running 'docker-compose up --build' reproduces the entire pipeline on any machine with "
-        "Docker installed, regardless of the operating system."
+        "MongoDB-Indizes auf (device_id, ts), location und alerts ermoeglichen effiziente Abfragen "
+        "fuer die geplanten Frontend-Anwendungen. Das System ist vollstaendig portabel: Durch Klonen "
+        "des GitHub-Repositorys und Ausfuehren von 'docker-compose up --build' wird die gesamte "
+        "Pipeline auf jedem Rechner mit Docker reproduziert, unabhaengig vom Betriebssystem."
     )
 
     pdf.body_text(
@@ -127,125 +131,122 @@ def generate_phase2():
     )
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, "Phase2_Development.pdf")
+    path = os.path.join(OUTPUT_DIR, "Phase2_Entwicklung.pdf")
     pdf.output(path)
-    print(f"Phase 2 saved: {path}")
+    print(f"Phase 2 gespeichert: {path}")
     return path
 
 
 def generate_phase3():
-    """Phase 3: Finalization — 2 page abstract with reflection."""
+    """Phase 3: Finalisierung — 2 Seiten Abstract mit Reflexion."""
     pdf = PortfolioPDF()
     pdf.add_page()
 
-    pdf.heading("Stream Processing Pipeline for Municipal IoT Sensor Data")
+    pdf.heading("Stream-Processing-Pipeline fuer kommunale IoT-Sensordaten")
 
-    # ── 1. Objective & Concept ──
-    pdf.small_heading("1. Objective and Concept")
+    # ── 1. Ziel und Konzept ──
+    pdf.small_heading("1. Ziel und Konzept")
     pdf.body_text(
-        "This project addresses the challenge of processing environmental sensor data for a municipality "
-        "that has deployed IoT sensors across the city. The sensors measure temperature, humidity, carbon "
-        "monoxide, smoke, LPG, noise levels, light, and motion at five distinct locations: the city center, "
-        "an industrial zone, a residential area, a park, and a highway bridge. The project goal is to build "
-        "a reliable, scalable, and maintainable data system that ingests sensor readings as a continuous "
-        "stream, processes them in near real-time, and stores them in a database accessible to front-end "
-        "applications for city planners and a citizen alerting system."
-    )
-
-    # ── 2. Technical Approach ──
-    pdf.small_heading("2. Technical Approach")
-    pdf.body_text(
-        "The system architecture follows a producer-consumer pattern built around Apache Kafka as the "
-        "central message broker. A Python producer reads sensor data from a CSV dataset containing "
-        "100,800 records and publishes each record as a JSON message to the Kafka topic 'sensor-data'. "
-        "The device ID serves as the Kafka partition key, ensuring that all readings from a given sensor "
-        "are delivered in order to the same partition. A Python consumer subscribes to this topic, "
-        "deserializes the messages, and writes them to MongoDB in batches of 500 documents."
-    )
-    pdf.body_text(
-        "During the consumption phase, each reading is enriched with two metadata fields: an ingestion "
-        "timestamp recording when the data was processed, and an alerts list flagging threshold violations. "
-        "The alert thresholds are configurable and currently monitor temperature (above 40 degrees Celsius), "
-        "humidity (above 90 percent or below 20 percent), carbon monoxide (above 0.02 ppm), smoke "
-        "(above 0.05 ppm), and noise (above 85 dB). In the test run, approximately 21 percent of all "
-        "readings triggered at least one alert, primarily from the industrial zone and highway bridge sensors."
+        "Dieses Projekt befasst sich mit der Herausforderung, Umwelt-Sensordaten fuer eine "
+        "Stadtverwaltung zu verarbeiten, die IoT-Sensoren in der Stadt installiert hat. Die Sensoren "
+        "messen Temperatur, Luftfeuchtigkeit, Kohlenmonoxid, Rauch, LPG, Laermpegel, Licht und "
+        "Bewegung an fuenf verschiedenen Standorten: Innenstadt, Industriegebiet, Wohngebiet, "
+        "Gruenflaeche und Autobahnbruecke. Das Projektziel ist der Aufbau eines zuverlaessigen, "
+        "skalierbaren und wartbaren Datensystems, das Sensormesswerte als kontinuierlichen Stream "
+        "aufnimmt, nahezu in Echtzeit verarbeitet und in einer Datenbank speichert, die fuer "
+        "Frontend-Anwendungen fuer Stadtplaner und ein Buerger-Warnsystem zugaenglich ist."
     )
 
-    # ── 3. Technology Choices ──
-    pdf.small_heading("3. Technology Choices and Justification")
+    # ── 2. Technischer Ansatz ──
+    pdf.small_heading("2. Technischer Ansatz")
     pdf.body_text(
-        "Apache Kafka was chosen over Spark Streaming for several reasons. First, Kafka provides a simpler "
-        "deployment model for the required producer-consumer pattern without the overhead of a full "
-        "distributed computing framework. Second, Kafka persists all messages to disk, providing durability "
-        "guarantees that allow consumers to replay data if needed. Third, Kafka scales horizontally by adding "
-        "brokers, which aligns with the municipality's future growth plans. Spark Streaming would be more "
-        "appropriate if complex windowed aggregations or machine learning inference were required at the "
-        "streaming layer, but for the current use case of ingesting and forwarding sensor data, Kafka is "
-        "the more efficient choice."
+        "Die Systemarchitektur folgt einem Producer-Consumer-Muster, aufgebaut um Apache Kafka als "
+        "zentralen Nachrichtenbroker. Ein Python-Producer liest Sensordaten aus einem CSV-Datensatz "
+        "mit 100.800 Datensaetzen und veroeffentlicht jeden als JSON-Nachricht an das Kafka-Topic "
+        "'sensor-data'. Die Geraete-ID dient als Kafka-Partitionsschluessel, wodurch sichergestellt "
+        "wird, dass alle Messwerte eines Sensors geordnet in dieselbe Partition geliefert werden. "
+        "Ein Python-Consumer abonniert dieses Topic, deserialisiert die Nachrichten und schreibt "
+        "sie in Batches von 500 Dokumenten in MongoDB."
     )
     pdf.body_text(
-        "MongoDB was selected as the storage layer because of its schema flexibility. The municipality "
-        "plans to add new sensor types (CO2, fine dust) in the future, and MongoDB's document model allows "
-        "new fields to be added without schema migrations. Additionally, MongoDB supports horizontal "
-        "scaling through sharding, compound indexes for time-series queries, and a strong ecosystem of "
-        "tooling and drivers. Alternatives such as PostgreSQL or Cassandra were considered: PostgreSQL "
-        "was rejected due to its rigid schema, and Cassandra was rejected due to its more complex "
-        "operational requirements for a prototype-scale project."
-    )
-
-    # ── 4. Containerization ──
-    pdf.small_heading("4. Containerization and Reproducibility")
-    pdf.body_text(
-        "The entire pipeline is containerized using Docker Compose, defining five services: Zookeeper "
-        "(cluster coordination for Kafka), Kafka (message broker), MongoDB (document store), and two "
-        "custom Python containers for the producer and consumer. Health checks ensure that Kafka only "
-        "starts after Zookeeper is ready, and that the producer and consumer only start after Kafka and "
-        "MongoDB pass their health checks. This eliminates race conditions during startup. The system "
-        "can be reproduced on any machine with Docker installed by cloning the GitHub repository and "
-        "running a single command: docker-compose up --build."
+        "Waehrend der Konsumierung wird jeder Messwert mit zwei Metadatenfeldern angereichert: einem "
+        "Aufnahmezeitstempel, der den Verarbeitungszeitpunkt festhalt, und einer Alarmliste, die "
+        "Grenzwertueberschreitungen kennzeichnet. Die Alarmgrenzen sind konfigurierbar und "
+        "ueberwachen derzeit Temperatur (ueber 40 Grad Celsius), Luftfeuchtigkeit (ueber 90 Prozent "
+        "oder unter 20 Prozent), Kohlenmonoxid (ueber 0,02 ppm), Rauch (ueber 0,05 ppm) und Laerm "
+        "(ueber 85 dB). Im Testlauf loesten etwa 21 Prozent aller Messwerte mindestens einen Alarm "
+        "aus, vorwiegend von den Sensoren im Industriegebiet und an der Autobahnbruecke."
     )
 
-    # ── 5. Results ──
-    pdf.small_heading("5. Results")
+    # ── 3. Technologieauswahl ──
+    pdf.small_heading("3. Technologieauswahl und Begruendung")
     pdf.body_text(
-        "The pipeline successfully processed all 100,800 sensor readings. MongoDB queries confirmed "
-        "correct data storage, with aggregation pipelines showing expected patterns: the industrial zone "
-        "recorded the highest average temperature (21.1 degrees Celsius) and CO levels, while the park area "
-        "recorded the lowest (17.2 degrees Celsius). Alert detection identified 1,580 threshold violations "
-        "in the first 6,500 documents alone, demonstrating the system's capability to flag environmental "
-        "anomalies for the planned citizen warning application."
+        "Apache Kafka wurde gegenueber Spark Streaming gewaehlt, da es ein einfacheres "
+        "Bereitstellungsmodell fuer das Producer-Consumer-Muster bietet, alle Nachrichten persistiert "
+        "und horizontal durch Hinzufuegen von Brokern skaliert. Spark Streaming waere bei komplexen "
+        "Fensteraggregationen geeigneter, aber fuer die Aufnahme und Weiterleitung von Sensordaten "
+        "ist Kafka die effizientere Wahl."
+    )
+    pdf.body_text(
+        "MongoDB wurde aufgrund seiner Schema-Flexibilitaet gewaehlt. Neue Sensortypen (CO2, "
+        "Feinstaub) koennen ohne Migrationen hinzugefuegt werden. MongoDB unterstuetzt Sharding, "
+        "zusammengesetzte Indizes fuer Zeitreihenabfragen und ein starkes Oekosystem. PostgreSQL "
+        "wurde aufgrund des starren Schemas abgelehnt, Cassandra aufgrund komplexerer "
+        "Betriebsanforderungen fuer den Prototyp-Massstab."
     )
 
-    # ── 6. Reflection ──
-    pdf.small_heading("6. Personal Reflection")
+    # ── 4. Containerisierung ──
+    pdf.small_heading("4. Containerisierung und Reproduzierbarkeit")
     pdf.body_text(
-        "This project deepened my understanding of stream processing architectures and the practical "
-        "challenges of containerized deployments. The most significant technical challenge was ensuring "
-        "the correct startup order of interdependent services. My initial health check for Zookeeper "
-        "relied on netcat, which was not available in the Confluent Docker image. I solved this by "
-        "switching to a bash-based TCP check, which taught me that container images often lack tools "
-        "assumed to be present on standard Linux systems."
+        "Die gesamte Pipeline ist mit Docker Compose containerisiert und definiert fuenf Dienste: "
+        "Zookeeper, Kafka, MongoDB und zwei Python-Container fuer Producer und Consumer. Health "
+        "Checks stellen die korrekte Startreihenfolge sicher und eliminieren Race Conditions. Das "
+        "System kann auf jedem Rechner mit Docker reproduziert werden: Repository klonen und "
+        "docker-compose up --build ausfuehren."
+    )
+
+    # ── 5. Ergebnisse ──
+    pdf.small_heading("5. Ergebnisse")
+    pdf.body_text(
+        "Die Pipeline hat alle 100.800 Sensormesswerte erfolgreich verarbeitet. MongoDB-Abfragen "
+        "bestaetigten die korrekte Datenspeicherung, wobei Aggregationspipelines erwartete Muster "
+        "zeigten: Das Industriegebiet verzeichnete die hoechste Durchschnittstemperatur (21,1 Grad "
+        "Celsius) und die hoechsten CO-Werte, waehrend die Gruenflaeche die niedrigsten aufwies "
+        "(17,2 Grad Celsius). Die Alarmerkennung identifizierte 1.580 Grenzwertueberschreitungen "
+        "allein in den ersten 6.500 Dokumenten, was die Faehigkeit des Systems demonstriert, "
+        "Umweltanomalien fuer die geplante Buerger-Warnanwendung zu erkennen."
+    )
+
+    # ── 6. Persönliche Reflexion ──
+    pdf.small_heading("6. Persoenliche Reflexion")
+    pdf.body_text(
+        "Dieses Projekt hat mein Verstaendnis von Stream-Processing-Architekturen und den praktischen "
+        "Herausforderungen containerisierter Bereitstellungen vertieft. Die bedeutendste technische "
+        "Herausforderung war die Sicherstellung der korrekten Startreihenfolge voneinander abhaengiger "
+        "Dienste. Mein urspruenglicher Health Check fuer Zookeeper basierte auf netcat, das im "
+        "Confluent-Docker-Image nicht verfuegbar war. Ich loeste dies durch den Wechsel zu einem "
+        "bash-basierten TCP-Check, was mich lehrte, dass Container-Images oft Werkzeuge vermissen "
+        "lassen, die auf Standard-Linux-Systemen als vorhanden angenommen werden."
     )
     pdf.body_text(
-        "Another challenge was balancing the consumer's batch size for MongoDB inserts. Smaller batches "
-        "provide lower latency but higher overhead, while larger batches improve throughput at the cost "
-        "of memory usage. I settled on batches of 500 documents as a reasonable trade-off for the "
-        "prototype scale. In a production environment, this parameter would need to be tuned based on "
-        "actual message rates and latency requirements."
+        "Eine weitere Herausforderung war die Batch-Groesse fuer MongoDB-Inserts. Kleinere Batches "
+        "bieten geringere Latenz, groessere besseren Durchsatz. Ich waehlte 500 Dokumente als "
+        "Kompromiss fuer den Prototyp-Massstab. In Produktion muesste dies basierend auf "
+        "Nachrichtenraten und Latenzanforderungen angepasst werden."
     )
     pdf.body_text(
-        "My problem-solving strategy for similar future projects would focus on three principles: first, "
-        "start with a minimal working prototype before adding complexity; second, use health checks and "
-        "dependency management to make containerized systems robust; and third, generate realistic "
-        "sample data early in the process to validate the pipeline end-to-end before connecting real "
-        "data sources. This project has strengthened my data engineering skills in Kafka, MongoDB, "
-        "Docker, and Python, all of which are directly applicable to real-world data infrastructure roles."
+        "Meine Problemloesungsstrategie fuer zukuenftige Projekte konzentriert sich auf drei "
+        "Prinzipien: erstens mit einem minimalen Prototyp beginnen; zweitens Health Checks und "
+        "Abhaengigkeitsverwaltung fuer robuste containerisierte Systeme nutzen; drittens fruehzeitig "
+        "realistische Beispieldaten generieren, um die Pipeline Ende-zu-Ende zu validieren. "
+        "Dieses Projekt hat meine Data-Engineering-Faehigkeiten in Kafka, MongoDB, Docker und "
+        "Python gestaerkt, die direkt auf reale Dateninfrastruktur-Aufgaben anwendbar sind."
     )
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = os.path.join(OUTPUT_DIR, "Phase3_Abstract.pdf")
     pdf.output(path)
-    print(f"Phase 3 saved: {path}")
+    print(f"Phase 3 gespeichert: {path}")
     return path
 
 
@@ -253,4 +254,4 @@ if __name__ == "__main__":
     generate_phase1()
     generate_phase2()
     generate_phase3()
-    print("\nAll portfolio PDFs generated successfully!")
+    print("\nAlle Portfolio-PDFs erfolgreich generiert!")
