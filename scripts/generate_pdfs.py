@@ -87,7 +87,7 @@ def generate_phase1():
     )
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, "Phase1_Konzeption.pdf")
+    path = os.path.join(OUTPUT_DIR, "Goebel-Marc_IU14074686_ProjektDataEngineering_P1_S.pdf")
     pdf.output(path)
     print(f"Phase 1 gespeichert: {path}")
     return path
@@ -131,7 +131,7 @@ def generate_phase2():
     )
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, "Phase2_Entwicklung.pdf")
+    path = os.path.join(OUTPUT_DIR, "Goebel-Marc_IU14074686_ProjektDataEngineering_P2_S.pdf")
     pdf.output(path)
     print(f"Phase 2 gespeichert: {path}")
     return path
@@ -244,7 +244,7 @@ def generate_phase3():
     )
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, "Phase3_Abstract.pdf")
+    path = os.path.join(OUTPUT_DIR, "Goebel-Marc_IU14074686_ProjektDataEngineering_P3_S.pdf")
     pdf.output(path)
     print(f"Phase 3 gespeichert: {path}")
     return path
